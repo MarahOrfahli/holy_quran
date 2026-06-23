@@ -1,0 +1,26 @@
+{
+  "name": "holy_quran",
+  "version": "1.0.0",
+  "description": "1. `git clone <repository url>`\r 2. `npm install`\r 3. `npm run dev`",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "npx @tailwindcss/cli -i ./src/css/input.css -o ./dist/output.css --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MarahOrfahli/holy_quran.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/MarahOrfahli/holy_quran/issues"
+  },
+  "homepage": "https://github.com/MarahOrfahli/holy_quran#readme",
+  "dependencies": {
+    "@tailwindcss/cli": "^4.3.1",
+    "tailwindcss": "^4.3.1"
+  }
+}

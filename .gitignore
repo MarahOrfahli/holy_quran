@@ -1,0 +1,8 @@
+# Build
+node_modules/
+dist/
+package-lock.json
+
+# Data (JSON)
+src/data/*.json
+src/data/**/*.json
