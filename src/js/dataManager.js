@@ -1,7 +1,7 @@
 export default async function getSurahIndex() {
   try {
 
-    const response = await import(`../data/surah.json`, {
+    const response = await import(`../data/quran_juz.json`, {
       with: { type: 'json' }
     });
     const Data = response.default;
@@ -14,7 +14,7 @@ export default async function getSurahIndex() {
 
 export async function getSurah(surahNumber) {
   try {
-    const response = await import(`../data/surah/surah_${surahNumber}.json`, {
+    const response = await import(`../data/verses/surah_${surahNumber}.json`, {
       with: { type: 'json' }
     });
     
