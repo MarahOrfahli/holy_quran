@@ -1,7 +1,22 @@
 @import "tailwindcss";
-@import "./custom.css";
+@theme {
+  --color-brand-50: #ecfdf5;
+  --color-brand-100: #d1fae5;
+  --color-brand-500: #10b981;
+  --color-brand-600: #059669;
+  --color-brand-700: #047857;
+  
+  --color-paper-light: #fdfbf7;
+  --color-paper-dark: #0f172a;
 
-/* @theme {
-  --color-primary: #3b82f6;
-  --font-script: 'Georgia', serif;
-} */
+  --font-cairo: "Cairo", sans-serif;
+  --font-amiri: "Amiri", serif;
+}
+
+
+
+
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+@import "../../node_modules/@fortawesome/fontawesome-free/css/all.min.css";
+@source "../../index.html"; 
+

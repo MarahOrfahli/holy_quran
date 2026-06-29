@@ -1,12 +1,320 @@
 <!doctype html>
-<html>
+<html data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link href="./dist/output.css" rel="stylesheet" />
+    <link href="./src/css/custom.css" rel="stylesheet" />
+    <!-- Google Fonts (Cairo for UI, Amiri for Quran Text) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <style>
+      
+    </style>
+
     <script type="module" src="./src/js/app.js" defer></script>
   </head>
-  <body>
-    <h1 class="text-3xl font-bold bg-blue-500 underline">Hello world!</h1>
+  <body
+    class="h-full overflow-hidden text-slate-800 dark:bg-gray-500 dark:text-slate-100 transition-colors duration-200"
+  >
+    <div class="flex h-full overflow-hidden relative">
+      <aside
+        id="sidebar"
+        class="fixed inset-y-0 left-0 z-50 flex flex-col w-80 lg:translate-x-0 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 transition-all duration-300 transform lg:static lg:z-auto"
+      >
+        <div
+          class="flex items-center justify-between h-16 px-6 border-b border-slate-200 dark:border-slate-800 shrink-0"
+        >
+          <div class="flex items-center gap-3">
+            <div
+              class="flex items-center justify-center w-9 h-9 rounded-lg bg-brand-500 text-white shadow-lg shadow-brand-500/30"
+            >
+              <i class="fa-solid fa-book-quran text-lg"></i>
+            </div>
+            <span
+              class="text-lg font-bold tracking-wide text-slate-900 dark:text-white font-cairo"
+              >القرآن الكريم</span
+            >
+          </div>
+          <button
+            id="close-sidebar-btn"
+            class="lg:hidden p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+          >
+            <i class="fa-solid fa-xmark text-xl"></i>
+          </button>
+        </div>
+
+        <div
+          class="p-4 border-b border-slate-200 dark:border-slate-800 shrink-0"
+        >
+          <div class="relative w-full">
+            <nav class="flex justify-around p-2 space-y-1" role="tablist">
+              <button
+                class="tab-btn active text-left cursor-pointer px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white font-medium font-cairo"
+                data-tab="surah-list"
+                role="tab"
+                aria-selected="true"
+              >
+                السور
+              </button>
+              <button
+                class="tab-btn text-left cursor-pointer px-4 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 font-cairo"
+                data-tab="Juz-list"
+                role="tab"
+                aria-selected="false"
+              >
+                الأجزاء
+              </button>
+              <button
+                class="tab-btn text-left cursor-pointer px-4 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 font-cairo"
+                data-tab="bookmarks-list"
+                role="tab"
+                aria-selected="false"
+              >
+                المحفوظات
+              </button>
+            </nav>
+          </div>
+        </div>
+
+        <section
+          class="flex-1 px-3 py-4 space-y-1 overflow-y-auto tab-panel"
+          id="surah-list"
+          role="tabpanel"
+        >
+          <div class="flex justify-center items-center h-full">
+            <i class="fa-solid fa-spinner fa-spin text-brand-500 text-2xl"></i>
+          </div>
+        </section>
+
+        <section
+          class="flex-1 px-3 py-4 space-y-1 overflow-y-auto tab-panel hidden"
+          id="Juz-list"
+          role="tabpanel"
+        >
+          <div class="flex justify-center items-center h-full">
+            <i class="fa-solid fa-spinner fa-spin text-brand-500 text-2xl"></i>
+          </div>
+        </section>
+
+        <section
+          class="flex-1 px-3 py-4 space-y-1 overflow-y-auto tab-panel hidden"
+          id="bookmarks-list"
+          role="tabpanel"
+        >
+          <div class="flex justify-center items-center h-full">
+            <i class="fa-solid fa-spinner fa-spin text-brand-500 text-2xl"></i>
+          </div>
+        </section>
+      </aside>
+
+      <div
+        id="sidebar-overlay"
+        class="fixed inset-0 bg-black/40 z-40 lg:hidden transition-opacity"
+      ></div>
+
+      <!-- Main -->
+      <main class="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+        <header
+          class="flex flex-wrap items-center justify-between min-h-16 py-2 px-4 lg:px-6 bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 shrink-0 gap-3"
+        >
+          <div class="flex items-center gap-4">
+            <button
+              id="menu-toggle-btn"
+              class="lg:hidden p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none"
+            >
+              <i class="fa-solid fa-bars text-xl"></i>
+            </button>
+            <h1
+              id="current-surah-title"
+              class="text-xl hidden sm:flex font-bold font-amiri text-brand-600 dark:text-brand-500"
+            >
+              جاري التحميل...
+            </h1>
+          </div>
+
+          <div
+            class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 hide-scroll"
+          >
+            <div
+              class="relative flex items-center bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-2"
+            >
+              <i
+                class="fa-solid fa-microphone-lines text-slate-400 text-sm ml-2"
+              ></i>
+              <select
+                id="reciter-select"
+                class="bg-transparent text-xs font-semibold py-2 text-slate-700 dark:text-slate-200 focus:outline-none cursor-pointer font-cairo"
+              >
+                <option value="ar.alafasy">مشاري العفاسي</option>
+                <option value="ar.abdulbasit">عبد الباسط عبد الصمد</option>
+                <option value="ar.husary">محمود خليل الحصري</option>
+                <option value="ar.minshawi">محمد صديق المنشاوي</option>
+                <option value="ar.sudais">عبد الرحمن السديس</option>
+              </select>
+            </div>
+
+            <div class="w-px h-6 bg-slate-200 dark:bg-slate-800 mx-1"></div>
+
+            <button
+              id="btn-translate"
+              class="hidden sm:flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-brand-50 hover:text-brand-600 hover:border-brand-200 dark:hover:bg-brand-900/20 dark:hover:border-brand-800 transition-all text-slate-600 dark:text-slate-300 font-cairo"
+            >
+              <i class="fa-solid fa-language"></i>
+              <span>الترجمة</span>
+            </button>
+
+            <button
+              id="btn-layout"
+              class="hidden sm:flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-brand-50 hover:text-brand-600 hover:border-brand-200 dark:hover:bg-brand-900/20 dark:hover:border-brand-800 transition-all text-slate-600 dark:text-slate-300 font-cairo"
+            >
+              <i class="fa-solid fa-book-open"></i>
+              <span>مزدوج</span>
+            </button>
+
+            <!-- Toggle Theme -->
+            <button
+              id="theme-toggle-btn"
+              class="hidden sm:inline p-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 transition-all"
+              title="Changing Theme"
+            ></button>
+
+            <button
+              id="setting-btn"
+              class="p-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 transition-all"
+              title="Changing setting"
+            >
+            <i class="fas fa-cog text-md"></i>
+          </button>
+          </div>
+        </header>
+
+        <!-- ************** Quran Book ************* -->
+        <!-- Reading Area -  -->
+        <div id="reading-area" class="flex-1 overflow-y-auto p-4 md:p-8 pb-32">
+          <div
+            id="loading-spinner"
+            class="hidden flex-col items-center justify-center h-full space-y-4"
+          >
+            <i
+              class="fa-solid fa-circle-notch fa-spin text-4xl text-brand-500"
+            ></i>
+            <p class="text-slate-500 font-semibold font-cairo">
+              جاري تحميل الآيات...
+            </p>
+          </div>
+          <!-- container -->
+          <div
+            id="quran-container"
+            class="max-w-5xl mx-auto bg-paper-light dark:bg-paper-dark border border-slate-200 dark:border-slate-800 rounded-2xl p-6 md:p-12 shadow-sm transition-all duration-500"
+          >
+            <div
+              id="bismillah"
+              class="text-center font-amiri text-3xl mb-8 text-slate-900 dark:text-white hidden"
+            >
+              بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ
+            </div>
+            <div
+              id="ayahs-wrapper"
+              class="quran-text text-2xl md:text-3xl lg:text-4xl text-justify text-slate-900 dark:text-slate-100 flex flex-wrap content-start gap-x-2 gap-y-4"
+              dir="rtl"
+            ></div>
+          </div>
+        </div>
+
+        <!-- **************** Audio Player **************** -->
+        <div
+          class="absolute bottom-0 left-0 right-0 bg-white/90 dark:bg-slate-950/90 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-4 z-30 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]"
+        >
+          <!-- Info Playin Audio -->
+          <div class="flex items-center gap-3 w-full sm:w-auto">
+            <div
+              class="w-10 h-10 rounded-full bg-brand-100 dark:bg-brand-900/50 flex items-center justify-center text-brand-600 dark:text-brand-400 shrink-0"
+            >
+              <i class="fa-solid fa-play" id="audio-status-icon"></i>
+            </div>
+            <div class="min-w-0 flex-1">
+              <p
+                id="now-playing-surah"
+                class="text-sm font-bold text-slate-900 dark:text-white truncate font-cairo"
+              >
+                سورة الفاتحة
+              </p>
+              <p
+                id="now-playing-ayah"
+                class="text-xs text-slate-500 dark:text-slate-400 truncate font-cairo"
+              >
+                آية: 1
+              </p>
+            </div>
+          </div>
+
+          <!-- Control Buttons -->
+          <div class="flex items-center gap-4">
+            <button
+              id="prev-ayah-btn"
+              class="p-2 text-slate-500 hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
+            >
+              <i class="fa-solid fa-backward-step"></i>
+            </button>
+            <button
+              id="main-play-btn"
+              class="w-12 h-12 flex items-center justify-center bg-brand-500 hover:bg-brand-600 text-white rounded-full shadow-lg shadow-brand-500/25 transition-all transform hover:scale-105"
+            >
+              <i class="fa-solid fa-play text-lg pl-1" id="main-play-icon"></i>
+            </button>
+            <button
+              id="next-ayah-btn"
+              class="p-2 text-slate-500 hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
+            >
+              <i class="fa-solid fa-forward-step"></i>
+            </button>
+          </div>
+
+          <!-- Control Voice -->
+          <div class="hidden md:flex items-center gap-2 w-32">
+            <i class="fa-solid fa-volume-low text-slate-400 text-sm"></i>
+            <input
+              type="range"
+              id="volume-slider"
+              min="0"
+              max="1"
+              step="0.1"
+              value="1"
+              class="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer dark:bg-slate-700 accent-brand-500"
+            />
+          </div>
+
+          <!-- Hiddin Audio -->
+          <audio id="quran-audio" class="hidden"></audio>
+        </div>
+      </main>
+    </div>
+
+    <!-- Toast -->
+    <div
+      id="toast"
+      class="fixed top-6 left-1/2 transform -translate-x-1/2 z-[60] flex items-center gap-3 px-4 py-3 bg-slate-800 text-white rounded-xl shadow-xl -translate-y-24 opacity-0 transition-all duration-300"
+    >
+      <i class="fa-solid fa-circle-info text-brand-400"></i>
+      <p class="text-sm font-semibold font-cairo" id="toast-message">
+        رسالة التنبيه
+      </p>
+    </div>
+    <script>
+      if ("theme" in localStorage) {
+        console.log("test");
+        document.documentElement.setAttribute("data-theme", localStorage.theme);
+        localStorage.theme === "dark"
+          ? (document.getElementById("theme-toggle-btn").innerHTML =
+              `<i class="fa-solid fa-sun text-md"></i>`)
+          : (document.getElementById("theme-toggle-btn").innerHTML =
+              `<i class="fa-solid fa-moon text-md"></i>`);
+      } else {
+        document.documentElement.setAttribute("data-theme", "light");
+        document.getElementById("theme-toggle-btn").innerHTML =
+          `<i class="fa-solid fa-moon text-md"></i>`;
+      }
+    </script>
   </body>
 </html>

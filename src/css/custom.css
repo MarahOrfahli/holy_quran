@@ -1,0 +1,56 @@
+@import "./input.css";
+body {
+  font-family: "Cairo", sans-serif;
+  height: 100vh;
+}
+
+.quran-text {
+  font-family: "Amiri", serif;
+  line-height: 2.5;
+}
+
+/* شريط التمرير المخصص */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #949699;
+  border-radius: 3px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+
+.ayah-active {
+  background-color: rgba(16, 185, 129, 0.15);
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.hide-scroll::-webkit-scrollbar {
+  display: none;
+}
+.hide-scroll {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@media (min-width: 640px) {
+  #setting-btn {
+    display: none;
+  }
+}
+
+.translate-to-left {
+  transform: translateX(-100%);
+}
+
+@media (min-width: 1024px) {
+  .translate-to-left {
+    transform: translateX(0);
+  }
+}
