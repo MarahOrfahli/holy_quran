@@ -49,8 +49,12 @@ body {
   transform: translateX(-100%);
 }
 
+.translate-to-right {
+  transform: translateX(100%);
+}
+
 @media (min-width: 1024px) {
-  .translate-to-left {
+  .translate-to-left, .translate-to-right {
     transform: translateX(0);
   }
 }

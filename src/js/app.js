@@ -1,9 +1,6 @@
-import { showAllVerses, displaySurahInUI } from "./utils.js";
+import { loadJuzList, loadSurahList, rtl } from "./utils.js";
+import { bookmarkManager } from "./bookmarks.js";
 
-console.log(await showAllVerses());
-displaySurahInUI(1);
-// displaySurahInUI(18);
-////////////////////////////
 // Elements...
 let audioElement = document.getElementById("quran-audio"),
   ayahsWrapper = document.getElementById("ayahs-wrapper"),
@@ -21,8 +18,25 @@ let audioElement = document.getElementById("quran-audio"),
   nextAyahBtn = document.getElementById("next-ayah-btn"),
   volumeSlider = document.getElementById("volume-slider");
 
+// Arrays...
+const READERS = [
+  { ar: "فارس عباد", en: "Fares Abbad" },
+  { ar: "محمد المنشاوي", en: "Mohammed Al-Minshawi" },
+  { ar: "سعد الغامدي", en: "Saad Al-Ghamdi" },
+  { ar: "عبد الباسط عبد الصمد", en: "Abdul Basit Abdul Samad" },
+  { ar: "محمود الحصري", en: "Mahmoud Al-Hussary" },
+  { ar: "ماهر المعيقلي", en: "Maher Al-Muaiqly" },
+  { ar: "عبد الرحمن السديس", en: "Abdul Rahman Al-Sudais" },
+  { ar: "مشاري راشد العفاسي", en: "Mashary Rashid Al-Afasy" },
+  { ar: "احمد العجمي", en: "Ahmed Al-Ajmi" },
+  { ar: "ياسر الدوسري", en: "Yasser Al-Dosari" }
+];
+
 function startApp() {
-  // Loading Surahs
+  // Loading App...
+  checkBookmarks();
+  loadSurahList();
+  loadJuzList();
   setupEventListeners();
 }
 
@@ -31,7 +45,7 @@ function startApp() {
 function toggleDarkMode() {
   const docClass = document.documentElement.classList;
   if (localStorage.theme === "dark") {
-    if(docClass.contains("dark")) docClass.remove("dark");
+    if (docClass.contains("dark")) docClass.remove("dark");
     localStorage.theme = "light";
     document.documentElement.setAttribute("data-theme", "light");
     themeToggleBtn.innerHTML = `<i class="fa-solid fa-moon text-md"></i>`;
@@ -46,17 +60,28 @@ function toggleDarkMode() {
 
 // Done Dont Change it...
 function toggleSidebar() {
+  let sidebarClass = "";
   if (!sidebar || !sidebarOverlay) return;
-
-  if (sidebar.classList.contains("translate-to-left")) {
-    sidebar.classList.remove("translate-to-left");
+  rtl ? (sidebarClass = "translate-to-right") : "translate-to-left";
+  if (sidebar.classList.contains(sidebarClass)) {
+    sidebar.classList.remove(sidebarClass);
     sidebar.classList.add("translate-x-0");
     sidebarOverlay.classList.remove("hidden");
   } else {
     sidebar.classList.remove("translate-x-0");
-    sidebar.classList.add("translate-to-left");
+    sidebar.classList.add(sidebarClass);
     sidebarOverlay.classList.add("hidden");
   }
+}
+
+function checkBookmarks() {
+  const bookmarksList = document.getElementById("bookmarks-list");
+  console.log(bookmarkManager);
+  if (bookmarkManager.bookmarks.length == 0)
+    bookmarksList.innerHTML = `<p class="text-slate-400 text-xs text-center py-8">
+                <span>لا توجد محفوظات حالياً</span><br/>
+                <span>يمكنك إضافة علامة عند الضغط على الاية</span>
+        </p>`;
 }
 
 /////////////////////////////////////////
@@ -121,6 +146,105 @@ function setupEventListeners() {
       if (targetPanel) targetPanel.classList.remove("hidden");
     });
   });
+
+  const tabs_nav = document.querySelectorAll(".tab-btn-nav");
+  const panels_page = document.querySelectorAll(".tab-panel-page");
+
+  tabs_nav.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      tabs_nav.forEach((b) => {
+        b.classList.remove("active");
+        b.setAttribute("aria-selected", "false");
+      });
+      panels_page.forEach((p) => p.classList.add("hidden"));
+
+      btn.classList.add("active");
+      btn.setAttribute("aria-selected", "true");
+
+      const target = btn.getAttribute("data-tab");
+      const targetPanel = document.getElementById(target);
+      if (targetPanel) targetPanel.classList.remove("hidden");
+    });
+  });
+
+  // Modal Elements...
+  const modal = document.getElementById("settingsModal");
+  const openBtn = document.getElementById("setting-btn");
+  const closeBtn = document.getElementById("closeSettingsBtn");
+  const darkToggle = document.getElementById("darkModeToggle");
+  const langSelect = document.getElementById("languageSelect");
+  const sizeBtns = document.querySelectorAll(".font-size-btn");
+  // const resetBtn = document.getElementById("resetBtn");
+
+  // Translation Will be in json file soon
+  const translations = {
+    ar: {
+      title: "الإعدادات",
+      darkMode: "الوضع الداكن",
+      darkDesc: "تبديل مظهر الموقع",
+      language: "اللغة",
+      langDesc: "اختر لغة العرض",
+      fontSize: "حجم الخط",
+      fontDesc: "صغير / متوسط / كبير",
+      reset: "إعادة تعيين الإعدادات",
+      saved: "تم حفظ الإعدادات تلقائياً"
+    },
+    en: {
+      title: "Settings",
+      darkMode: "Dark Mode",
+      darkDesc: "Toggle site appearance",
+      language: "Language",
+      langDesc: "Choose display language",
+      fontSize: "Font Size",
+      fontDesc: "Small / Medium / Large",
+      reset: "Reset Settings",
+      saved: "Settings saved automatically"
+    }
+  };
+
+  function openModal() {
+    modal.classList.remove("hidden");
+    // إضافة تأثير fade-in
+    setTimeout(() => {
+      modal.querySelector(".modal-content").classList.remove("scale-95");
+      modal.querySelector(".modal-content").classList.add("scale-100");
+    }, 10);
+  }
+
+  function closeModal() {
+    modal.querySelector(".modal-content").classList.remove("scale-100");
+    modal.querySelector(".modal-content").classList.add("scale-95");
+    setTimeout(() => {
+      modal.classList.add("hidden");
+    }, 250);
+  }
+
+  // openBtn.addEventListener("click", openModal);
+  // closeBtn.addEventListener("click", closeModal);
+  // إغلاق عند الضغط خارج المودال
+  // modal.addEventListener("click", function (e) {
+  //   if (e.target === modal) {
+  //     closeModal();
+  //   }
+  // });
+
+  // تبديل الوضع الداكن
+  // darkToggle.addEventListener("change", function () {
+  //   applyDarkMode(this.checked);
+  // });
+
+  // تغيير اللغة
+  // langSelect.addEventListener("change", function () {
+  //   applyLanguage(this.value);
+  // });
+
+  // تغيير حجم الخط
+  // sizeBtns.forEach((btn) => {
+  //   btn.addEventListener("click", function () {
+  //     const size = this.dataset.size;
+  //     applyFontSize(size);
+  //   });
+  // });
 }
 
 // Starting App
@@ -130,71 +254,6 @@ if (document.readyState === "loading") {
 } else {
   startApp();
 }
-
-// async function fetchSurahList() {
-//   const surahListContainer = document.getElementById("surah-list");
-//   try {
-//     const data = await showAllVerses();
-
-//     if (data.code === 200) {
-//       allSurahs = data.data;
-//       renderSurahList(allSurahs);
-//       loadSurah(1);
-
-//       // تعبئة البيانات الفارغة مؤقتاً لقائمة الأجزاء والمحفوظات لتجنب اللودر اللانهائي
-//       const juzList = document.getElementById("Juz-list");
-//       if (juzList)
-//         juzList.innerHTML =
-//           '<p class="text-slate-400 text-xs text-center py-8">سيتم توفير الأجزاء قريباً</p>';
-//       const bookmarksList = document.getElementById("bookmarks-list");
-//       if (bookmarksList)
-//         bookmarksList.innerHTML =
-//           '<p class="text-slate-400 text-xs text-center py-8">لا توجد محفوظات حالياً</p>';
-//     }
-//   } catch (error) {
-//     if (surahListContainer) {
-//       surahListContainer.innerHTML =
-//         '<p class="text-rose-500 text-sm text-center">فشل في الاتصال بالخادم. يرجى التحقق من الإنترنت.</p>';
-//     }
-//   }
-// }
-
-// function renderSurahList(surahs) {
-//   const listContainer = document.getElementById("surah-list");
-//   if (!listContainer) return;
-//   listContainer.innerHTML = "";
-
-//   surahs.forEach((surah) => {
-//     const isActive = surah.number === currentSurahId;
-//     const activeClass = isActive
-//       ? "bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400 border-r-4 border-brand-500"
-//       : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900 border-r-4 border-transparent hover:border-slate-300 dark:hover:border-slate-700";
-
-//     const html = `
-//       <button data-surah-id="${surah.number}" class="w-full text-right flex items-center justify-between px-4 py-3 rounded-l-lg transition-all ${activeClass}">
-//           <div class="flex items-center gap-3">
-//               <div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-xs font-bold font-amiri ${isActive ? "text-brand-600 dark:text-brand-400" : "text-slate-500"}">
-//                   ${surah.number}
-//               </div>
-//               <div class="text-right">
-//                   <h4 class="text-sm font-bold font-amiri">${surah.name}</h4>
-//                   <p class="text-[10px] text-slate-400 font-cairo">${surah.revelationType === "Meccan" ? "مكية" : "مدنية"} • ${surah.numberOfAyahs} آية</p>
-//               </div>
-//           </div>
-//           <span class="text-xs font-semibold text-slate-400 font-cairo">${surah.englishName}</span>
-//       </button>
-//     `;
-//     listContainer.insertAdjacentHTML("beforeend", html);
-//   });
-
-//   // تعيين حدث النقر المباشر لكل زر سورة لضمان عدم حدوث تضارب
-//   listContainer.querySelectorAll("button[data-surah-id]").forEach((btn) => {
-//     btn.addEventListener("click", () => {
-//       const id = parseInt(btn.getAttribute("data-surah-id"));
-//       loadSurah(id);
-//     });
-//   });
-// }
 
 // // 3. تحميل سورة وعرضها
 // async function loadSurah(surahNumber) {
@@ -451,41 +510,43 @@ function removeHighlight() {
 
 // 7. تحسينات تجربة المستخدم والقائمة الجانبية والتنبيهات
 function toggleTranslation() {
-  showTranslationMode = !showTranslationMode;
+  document.documentElement.lang == "ar"
+    ? ((document.documentElement.lang = "en"),
+      (document.documentElement.dir = "ltr"))
+    : ((document.documentElement.lang = "ar"),
+      (document.documentElement.dir = "rtl"));
 
-  if (showTranslationMode) {
-    if (btnTranslate) {
-      btnTranslate.classList.add(
-        "bg-brand-100",
-        "text-brand-700",
-        "dark:bg-brand-900/40",
-        "dark:text-brand-400"
-      );
-      btnTranslate.classList.remove("bg-slate-50", "text-slate-600");
-    }
 
-    isDoublePageLayout = false;
-    if (btnLayout) {
-      btnLayout.classList.remove(
-        "bg-brand-100",
-        "text-brand-700",
-        "dark:bg-brand-900/40",
-        "dark:text-brand-400"
-      );
-    }
-  } else {
-    if (btnTranslate) {
-      btnTranslate.classList.remove(
-        "bg-brand-100",
-        "text-brand-700",
-        "dark:bg-brand-900/40",
-        "dark:text-brand-400"
-      );
-      btnTranslate.classList.add("bg-slate-50", "text-slate-600");
-    }
-  }
 
-  if (currentSurahData.length > 0) renderAyahs();
+  // ("lang" in localStorage) ? localStorage.lang =
+
+  // if ("lang" in localStorage) {
+  //   if (localStorage.lang == "ar") {
+  //     localStorage.lang = "en";
+  //     document.documentElement.lang = "en";
+  //     document.documentElement.dir = "ltr";
+  //     // if(sidebar.classList.contains("translate-to-left")){
+  //     //   sidebar.classList.remove("translate-x-0");
+  //     // sidebar.classList.add("translate-to-left");
+  //     // sidebarOverlay.classList.add("hidden");
+  //     // }
+  //   } else {
+  //     localStorage.lang = "ar";
+  //     document.documentElement.lang = "ar";
+  //     document.documentElement.dir = "rtl";
+  //   }
+  // } 
+
+  // if (sidebar.classList.contains("translate-to-right")) {
+  //       sidebar.classList.remove("translate-to-right");
+  //       sidebar.classList.add("translate-x-0");
+  //   sidebar.classList.add("lg:translate-x-0");
+
+  //       sidebarOverlay.classList.remove("hidden");
+  //     }
+
+  // else localStorage.lang = html.lang;
+  // toggleSidebar()
 }
 
 function toggleLayout() {
@@ -519,8 +580,6 @@ function toggleLayout() {
   if (currentSurahData.length > 0) renderAyahs();
 }
 
-
-
 function showToast(message) {
   const toast = document.getElementById("toast");
   const toastMessage = document.getElementById("toast-message");
@@ -536,7 +595,5 @@ function showToast(message) {
     toast.classList.add("-translate-y-24", "opacity-0");
   }, 3000);
 }
-
-
 
 import "../../node_modules/@fortawesome/fontawesome-free/js/all.min.js";
